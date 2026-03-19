@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A1A2E">
+<title>DX K9 Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1A1A2E;--gold:#C9A84C;--gold-dim:rgba(201,168,76,0.12);--off-white:#F7F7F5;
+  --charcoal:#2C2C2C;--mid:#6B6B7B;--border:rgba(201,168,76,0.18);--card:#21213A;
+  --danger:#C94C4C;--safe:#4CA87A;--warn:#C9944C;
+  --n8n-master:https://dxk9academy.app.n8n.cloud/webhook/dxk9-master;
+}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--navy);font-family:'EB Garamond',Georgia,serif;color:var(--off-white);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+input,select,textarea{font-size:16px!important;font-family:'EB Garamond',Georgia,serif}
+/* ── PIN SCREEN ── */
+#screen-pin{background:var(--navy);align-items:center;justify-content:center;padding:40px 24px}
+.pin-logo{text-align:center;margin-bottom:48px}
+.pin-mark{width:72px;height:72px;border:2px solid var(--gold);margin:0 auto 18px;display:flex;align-items:center;justify-content:center;position:relative}
+.pin-mark::before{content:'';position:absolute;inset:5px;border:1px solid rgba(201,168,76,0.25)}
+.pin-dx{font-size:24px;font-weight:700;color:var(--gold);letter-spacing:3px}
+.pin-brand{font-size:20px;font-weight:600;letter-spacing:4px;color:var(--off-white);text-transform:uppercase}
+.pin-tag{font-size:12px;color:var(--mid);letter-spacing:2px;margin-top:6px;font-style:italic}
+.btn-primary{background:var(--gold);color:var(--navy);border:none;height:52px;font-family:'EB Garamond',Georgia,serif;font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;-webkit-appearance:none;transition:opacity .15s}
+.btn-primary:active{opacity:.8}
+.btn-outline{background:transparent;color:var(--off-white);border:1px solid rgba(247,247,245,0.25);height:52px;font-family:'EB Garamond',Georgia,serif;font-size:16px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;-webkit-appearance:none}
+.btn-outline:active{border-color:var(--gold)}
+.mode-btns{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px}
+.pin-div{display:flex;align-items:center;gap:12px;color:var(--mid);font-size:12px}
+.pin-div::before,.pin-div::after{content:'';flex:1;height:1px;background:rgba(247,247,245,0.08)}
+/* ── PIN OVERLAY ── */
+#pin-overlay{position:fixed;inset:0;background:rgba(26,26,46,.97);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
+#pin-overlay.active{display:flex}
+.pin-entry-title{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);margin-bottom:28px}
+.pin-dots{display:flex;gap:14px;margin-bottom:36px}
+.pin-dot{width:13px;height:13px;border:1.5px solid rgba(201,168,76,0.35);background:transparent;transition:background .1s,border-color .1s}
+.pin-dot.filled{background:var(--gold);border-color:var(--gold)}
+.pin-kp{display:grid;grid-template-columns:repeat(3,76px);gap:8px;margin-bottom:16px}
+.pin-key{height:60px;background:var(--card);border:1px solid rgba(201,168,76,0.12);color:var(--off-white);font-family:'EB Garamond',Georgia,serif;font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-appearance:none;-webkit-tap-highlight-color:transparent}
+.pin-key:active{background:var(--gold-dim)}
+.pin-key.del{font-size:16px;color:var(--mid)}
+.pin-key.empty{background:transparent;border-color:transparent;pointer-events:none}
+.pin-err{color:var(--danger);font-size:12px;height:18px;margin-bottom:14px;opacity:0;transition:opacity .2s}
+.pin-err.show{opacity:1}
+.pin-cancel-btn{background:none;border:none;color:var(--mid);font-family:'EB Garamond',Georgia,serif;font-size:13px;letter-spacing:1px;cursor:pointer;padding:12px;-webkit-appearance:none}
+/* ── CONFIG OVERLAY ── */
+#config-overlay{position:fixed;inset:0;background:rgba(26,26,46,.99);z-index:300;display:none;flex-direction:column;padding:env(safe-area-inset-top,44px) 0 0}
+#config-overlay.active{display:flex}
+.config-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.config-title{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
+.config-body{padding:24px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1}
+.config-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:6px}
+.config-input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--off-white);font-family:'EB Garamond',Georgia,serif;font-size:16px;padding:11px 14px;-webkit-appearance:none;outline:none;margin-bottom:16px}
+.config-note{font-size:13px;color:var(--mid);font-style:italic;line-height:1.6;margin-bottom:20px}
+.config-msg{font-size:13px;min-height:20px;margin-bottom:12px}
+/* ── APP SHELL ── */
+.app-header{flex-shrink:0;padding:env(safe-area-inset-top,44px) 20px 0;background:var(--navy)}
+.app-header-inner{display:flex;align-items:center;justify-content:space-between;height:50px;border-bottom:1px solid var(--border)}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.hdr-mark{width:26px;height:26px;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;flex-shrink:0}
+.hdr-title{font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--off-white)}
+.hdr-btns{display:flex;align-items:center;gap:6px}
+.hdr-btn{width:44px;height:44px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;-webkit-appearance:none}
+.hdr-btn svg{width:17px;height:17px;stroke:var(--mid);fill:none;stroke-width:1.5;stroke-linecap:square}
+.exit-btn{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);background:none;border:1px solid rgba(107,107,123,0.22);padding:5px 9px;cursor:pointer;font-family:'EB Garamond',Georgia,serif;-webkit-appearance:none;height:28px;display:flex;align-items:center}
+.app-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative}
+/* ── TAB NAV ── */
+.tab-nav{flex-shrink:0;background:var(--navy);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 3px;background:none;border:none;border-top:2px solid transparent;cursor:pointer;min-height:54px;-webkit-tap-highlight-color:transparent;font-family:'EB Garamond',Georgia,serif;-webkit-appearance:none;transition:border-color .12s}
+.tab-btn.active{border-top-color:var(--gold)}
+.tab-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center}
+.tab-icon svg{width:16px;height:16px;stroke:var(--mid);fill:none;stroke-width:1.5;stroke-linecap:square;stroke-linejoin:miter;transition:stroke .12s}
+.tab-btn.active .tab-icon svg{stroke:var(--gold)}
+.tab-label{font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);transition:color .12s;white-space:nowrap}
+.tab-btn.active .tab-label{color:var(--gold)}
+/* ── PANELS ── */
+.tab-panel{display:none;animation:fadeIn .16s ease}
+.tab-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+/* ── COMMON UI ── */
+.section-pad{padding:22px 20px}
+.eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.sec-title{font-size:24px;font-weight:600;color:var(--off-white);margin-bottom:4px;line-height:1.2}
+.sec-sub{font-size:14px;color:var(--mid);font-style:italic;margin-bottom:22px;line-height:1.5}
+.gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 0 22px;opacity:.35}
+.card{background:var(--card);border:1px solid var(--border);padding:18px;margin-bottom:10px}
+.card-title{font-size:13px;font-weight:600;letter-spacing:1px;color:var(--off-white);margin-bottom:5px;text-transform:uppercase}
+.card-body{font-size:14px;color:var(--mid);line-height:1.6;font-style:italic}
+.field-group{margin-bottom:16px}
+.field-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:6px}
+.field-input{width:100%;background:var(--navy);border:1px solid var(--border);color:var(--off-white);font-family:'EB Garamond',Georgia,serif;font-size:16px;padding:11px 14px;-webkit-appearance:none;outline:none;margin-bottom:0}
+.field-input:focus{border-color:rgba(201,168,76,0.5)}
+.field-select{width:100%;background:var(--navy);border:1px solid var(--border);color:var(--off-white);font-family:'EB Garamond',Georgia,serif;font-size:16px;padding:11px 14px;-webkit-appearance:none;outline:none;cursor:pointer}
+.field-textarea{width:100%;background:var(--navy);border:1px solid var(--border);color:var(--off-white);font-family:'EB Garamond',Georgia,serif;font-size:16px;padding:11px 14px;-webkit-appearance:none;outline:none;resize:none;line-height:1.6}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.chip{padding:7px 12px;border:1px solid rgba(107,107,123,0.3);font-size:12px;color:var(--mid);cursor:pointer;font-family:'EB Garamond',Georgia,serif;background:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;transition:all .12s;letter-spacing:.5px}
+.chip.selected{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+.sev-row{display:flex;gap:6px;margin-top:6px}
+.sev-btn{flex:1;height:34px;border:1px solid rgba(107,107,123,0.25);font-family:'EB Garamond',Georgia,serif;font-size:11px;letter-spacing:1px;cursor:pointer;background:none;color:var(--mid);-webkit-appearance:none;text-transform:uppercase}
+.sev-btn.sel-mild{border-color:var(--safe);color:var(--safe);background:rgba(76,168,122,0.1)}
+.sev-btn.sel-moderate{border-color:var(--warn);color:var(--warn);background:rgba(201,148,76,0.1)}
+.sev-btn.sel-severe{border-color:var(--danger);color:var(--danger);background:rgba(201,76,76,0.1)}
+.step-indicator{display:flex;gap:6px;margin-bottom:20px}
+.step-dot{width:8px;height:8px;background:rgba(107,107,123,0.3);transition:background .15s}
+.step-dot.active{background:var(--gold)}
+.step-dot.done{background:rgba(201,168,76,0.4)}
+.result-box{background:var(--card);border:1px solid var(--border);padding:18px;margin-bottom:12px}
+.result-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.result-value{font-size:15px;color:var(--off-white);line-height:1.6}
+.aggression-flag{background:rgba(201,76,76,0.1);border:1px solid rgba(201,76,76,0.4);padding:14px 16px;margin-bottom:12px}
+.aggression-flag-text{font-size:13px;color:var(--danger);letter-spacing:.5px}
+.prog-card{background:var(--card);border:1px solid var(--border);padding:16px;margin-bottom:8px}
+.prog-code{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700;margin-bottom:4px;text-transform:uppercase}
+.prog-name{font-size:14px;color:var(--off-white);font-weight:600;margin-bottom:4px}
+.prog-rationale{font-size:13px;color:var(--mid);font-style:italic;line-height:1.5}
+.copy-btn{display:flex;align-items:center;gap:8px;background:none;border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-family:'EB Garamond',Georgia,serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;padding:9px 14px;cursor:pointer;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;margin-top:10px;width:100%;justify-content:center}
+.copy-btn:active{background:var(--gold-dim)}
+.client-card{background:var(--card);border:1px solid var(--border);padding:16px;margin-bottom:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.client-card:active{border-color:var(--gold)}
+.client-name{font-size:15px;font-weight:600;color:var(--off-white);margin-bottom:3px}
+.client-meta{font-size:12px;color:var(--mid);margin-bottom:8px}
+.progress-bar{height:3px;background:rgba(107,107,123,0.2);position:relative;overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);transition:width .3s}
+.session-card{background:var(--card);border:1px solid var(--border);padding:14px;margin-bottom:8px}
+.session-num{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.session-date{font-size:13px;color:var(--mid);margin-bottom:6px}
+.session-body{font-size:14px;color:var(--off-white);line-height:1.6}
+.status-badge{display:inline-block;padding:3px 8px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase}
+.status-active{border:1px solid rgba(76,168,122,0.4);color:var(--safe)}
+.status-graduated{border:1px solid rgba(201,168,76,0.4);color:var(--gold)}
+.status-paused{border:1px solid rgba(201,148,76,0.4);color:var(--warn)}
+.sched-card{background:var(--card);border:1px solid var(--border);padding:14px;margin-bottom:8px}
+.sched-date{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.sched-title{font-size:15px;color:var(--off-white);font-weight:500;margin-bottom:3px}
+.sched-meta{font-size:12px;color:var(--mid)}
+.doc-card{background:var(--card);border:1px solid var(--border);padding:18px;margin-bottom:10px}
+.doc-card-title{font-size:13px;font-weight:600;letter-spacing:1px;color:var(--off-white);text-transform:uppercase;margin-bottom:6px}
+.doc-card-desc{font-size:13px;color:var(--mid);font-style:italic;margin-bottom:12px}
+.prog-search{width:100%;background:var(--card);border:1px solid var(--border);color:var(--off-white);font-family:'EB Garamond',Georgia,serif;font-size:16px;padding:12px 16px;-webkit-appearance:none;outline:none;margin-bottom:14px}
+.prog-search::placeholder{color:var(--mid)}
+.filter-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.filter-pill{padding:5px 11px;border:1px solid rgba(107,107,123,0.25);font-size:11px;color:var(--mid);cursor:pointer;font-family:'EB Garamond',Georgia,serif;background:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;letter-spacing:.5px;text-transform:uppercase}
+.filter-pill.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+.sop-card{background:var(--card);border:1px solid var(--border);margin-bottom:8px;overflow:hidden}
+.sop-header{padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;-webkit-tap-highlight-color:transparent}
+.sop-code{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:700;margin-bottom:3px;text-transform:uppercase}
+.sop-name{font-size:14px;color:var(--off-white);font-weight:500}
+.sop-cat{font-size:11px;color:var(--mid);font-style:italic;margin-top:2px}
+.sop-chevron{width:14px;height:14px;flex-shrink:0;stroke:var(--mid);fill:none;stroke-width:1.5;transition:transform .2s}
+.sop-card.open .sop-chevron{transform:rotate(180deg)}
+.sop-body{display:none;padding:0 16px 16px}
+.sop-card.open .sop-body{display:block}
+.sop-section{margin-bottom:14px}
+.sop-section-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.sop-section-body{font-size:13px;color:var(--mid);line-height:1.7;font-style:italic}
+.loader{display:flex;align-items:center;justify-content:center;padding:40px;gap:8px}
+.loader-dot{width:6px;height:6px;background:var(--gold);animation:pulse 1.2s ease infinite}
+.loader-dot:nth-child(2){animation-delay:.2s}
+.loader-dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--off-white);font-size:13px;padding:10px 18px;letter-spacing:.5px;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.routine-block{background:var(--card);border:1px solid var(--border);margin-bottom:10px;overflow:hidden}
+.routine-block-header{padding:14px 16px;background:rgba(201,168,76,0.06);border-bottom:1px solid var(--border)}
+.routine-block-title{font-size:13px;font-weight:600;letter-spacing:1px;color:var(--gold);text-transform:uppercase}
+.routine-step{padding:12px 16px;border-bottom:1px solid rgba(201,168,76,0.07);display:flex;gap:14px}
+.routine-step:last-child{border-bottom:none}
+.routine-step-time{font-size:12px;color:var(--gold);font-weight:600;min-width:60px;flex-shrink:0;letter-spacing:.5px}
+.routine-step-content{}
+.routine-step-action{font-size:14px;color:var(--off-white);font-weight:500;margin-bottom:2px}
+.routine-step-detail{font-size:12px;color:var(--mid);font-style:italic;line-height:1.5}
+@media print{
+  .app-header,.tab-nav,.hdr-btns,.exit-btn{display:none!important}
+  .screen,.app-content{overflow:visible!important;position:static!important}
+  body{background:white!important;color:black!important}
+  .routine-block{break-inside:avoid}
+}
+@media(min-width:768px){
+  .tab-nav{flex-direction:column;width:170px;flex-shrink:0;border-top:none;border-right:1px solid var(--border);padding-bottom:0;align-self:stretch}
+  .tab-btn{flex-direction:row;justify-content:flex-start;gap:10px;padding:13px 18px;border-top:none;border-right:2px solid transparent;min-height:48px;flex:none}
+  .tab-btn.active{border-right-color:var(--gold);background:var(--gold-dim)}
+  .tab-label{font-size:11px}
+  .trainer-body{flex:1;overflow:hidden;display:flex}
+  .app-content{flex:1}
+}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- ══ PIN SCREEN ══ -->
+<div id="screen-pin" class="screen active">
+  <div class="pin-logo">
+    <div class="pin-mark"><span class="pin-dx">DX</span></div>
+    <div class="pin-brand">K9 Academy</div>
+    <div class="pin-tag">Structure. Clarity. Real-Life Results.</div>
+  </div>
+  <div class="mode-btns">
+    <button class="btn-primary" onclick="openPinEntry()">Trainer Login</button>
+    <div class="pin-div">or</div>
+    <button class="btn-outline" onclick="showConfig()">Configure Webhooks</button>
+  </div>
+</div>
+
+<!-- ══ PIN ENTRY ══ -->
+<div id="pin-overlay">
+  <div class="pin-entry-title">Enter Trainer PIN</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-err" id="pin-err">Incorrect PIN</div>
+  <div class="pin-kp">
+    <button class="pin-key" onclick="pp('1')">1</button><button class="pin-key" onclick="pp('2')">2</button><button class="pin-key" onclick="pp('3')">3</button>
+    <button class="pin-key" onclick="pp('4')">4</button><button class="pin-key" onclick="pp('5')">5</button><button class="pin-key" onclick="pp('6')">6</button>
+    <button class="pin-key" onclick="pp('7')">7</button><button class="pin-key" onclick="pp('8')">8</button><button class="pin-key" onclick="pp('9')">9</button>
+    <button class="pin-key empty"></button><button class="pin-key" onclick="pp('0')">0</button><button class="pin-key del" onclick="pd()">⌫</button>
+  </div>
+  <button class="pin-cancel-btn" onclick="closePinEntry()">Cancel</button>
+</div>
+
+<!-- ══ CONFIG OVERLAY ══ -->
+<div id="config-overlay">
+  <div class="config-header">
+    <div class="config-title">Webhook Configuration</div>
+    <button onclick="closeConfig()" style="background:none;border:none;color:var(--mid);font-family:'EB Garamond',Georgia,serif;font-size:13px;cursor:pointer;padding:8px;-webkit-appearance:none">Close</button>
+  </div>
+  <div class="config-body">
+    <p class="config-note">Your N8N master webhook URL and PIN. The webhook URL is your single connection point for all app features.</p>
+    <label class="config-label">Master Webhook URL (optional override)</label>
+    <input class="config-input" id="cfg-master" placeholder="https://dxk9academy.app.n8n.cloud/webhook/dxk9-master">
+    <label class="config-label">Trainer PIN</label>
+    <input class="config-input" id="cfg-pin" placeholder="4-digit PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+    <div class="config-msg" id="cfg-msg"></div>
+    <button class="btn-primary" onclick="saveConfig()">Save</button>
+  </div>
+</div>
+
+<!-- ══ TRAINER APP ══ -->
+<div id="screen-trainer" class="screen">
+  <div class="app-header">
+    <div class="app-header-inner">
+      <div class="hdr-left"><div class="hdr-mark">DX</div><div class="hdr-title">K9 Academy</div></div>
+      <div class="hdr-btns">
+        <button class="exit-btn" onclick="exitTrainer()">Exit</button>
+        <button class="hdr-btn" onclick="showConfig()" aria-label="Settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="trainer-body" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+    <div class="app-content" id="trainer-content">
+
+      <!-- TAB 0: LIBRARY -->
+      <div class="tab-panel active" id="tp0">
+        <div class="section-pad">
+          <div class="eyebrow">Clarity Code™</div>
+          <div class="sec-title">Programme Library</div>
+          <div class="sec-sub">24 SOPs across 8 categories. Tap any programme to expand.</div>
+          <input class="prog-search" id="prog-search" placeholder="Search by name, code, or keyword…" oninput="filterProgs()">
+          <div class="filter-pills" id="filter-pills">
+            <button class="filter-pill active" onclick="setFilter('ALL',this)">All</button>
+            <button class="filter-pill" onclick="setFilter('Foundational',this)">Foundational</button>
+            <button class="filter-pill" onclick="setFilter('Developmental',this)">Puppy</button>
+            <button class="filter-pill" onclick="setFilter('Socialisation',this)">Social</button>
+            <button class="filter-pill" onclick="setFilter('Behaviour',this)">Behaviour</button>
+            <button class="filter-pill" onclick="setFilter('Fear',this)">Fear</button>
+            <button class="filter-pill" onclick="setFilter('Reactivity',this)">Reactivity</button>
+            <button class="filter-pill" onclick="setFilter('Aggression',this)">Aggression</button>
+            <button class="filter-pill" onclick="setFilter('Advanced',this)">Advanced</button>
+          </div>
+          <div id="prog-list"></div>
+        </div>
+      </div>
+
+      <!-- TAB 1: CONSULTATION -->
+      <div class="tab-panel" id="tp1">
+        <div class="section-pad" id="consult-container">
+          <div class="eyebrow">Assessment</div>
+          <div class="sec-title">Consultation Tool</div>
+          <div class="sec-sub">Step-by-step intake. AI-powered recommendation.</div>
+          <div class="step-indicator" id="step-indicator"></div>
+          <div id="consult-step-content"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: CLIENTS -->
+      <div class="tab-panel" id="tp2">
+        <div class="section-pad">
+          <div class="eyebrow">Management</div>
+          <div class="sec-title">Active Clients</div>
+          <div class="sec-sub">All client records, session logs, and progress.</div>
+          <button class="btn-primary" style="margin-bottom:16px" onclick="showAddClientForm()">+ New Client</button>
+          <div id="clients-list"><div class="loader"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: SCHEDULE -->
+      <div class="tab-panel" id="tp3">
+        <div class="section-pad">
+          <div class="eyebrow">Upcoming Sessions</div>
+          <div class="sec-title">Schedule</div>
+          <div class="sec-sub">Next 7 days from Google Calendar.</div>
+          <button class="btn-outline" style="margin-bottom:16px;width:auto;padding:0 18px" onclick="loadSchedule()">Refresh</button>
+          <div id="schedule-list"><div class="loader"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div></div>
+        </div>
+      </div>
+
+      <!-- TAB 4: QUICK SHARE -->
+      <div class="tab-panel" id="tp4">
+        <div class="section-pad">
+          <div class="eyebrow">Documents</div>
+          <div class="sec-title">Quick Share</div>
+          <div class="sec-sub">Client documents, session recaps, and routine builder.</div>
+          <div id="quickshare-content"></div>
+        </div>
+      </div>
+
+    </div>
+    <nav class="tab-nav" id="trainer-nav">
+      <button class="tab-btn active" onclick="tTab(0,this)">
+        <div class="tab-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg></div>
+        <span class="tab-label">Library</span>
+      </button>
+      <button class="tab-btn" onclick="tTab(1,this)">
+        <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+        <span class="tab-label">Consult</span>
+      </button>
+      <button class="tab-btn" onclick="tTab(2,this);loadClients()">
+        <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <span class="tab-label">Clients</span>
+      </button>
+      <button class="tab-btn" onclick="tTab(3,this);loadSchedule()">
+        <div class="tab-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <span class="tab-label">Schedule</span>
+      </button>
+      <button class="tab-btn" onclick="tTab(4,this);renderQuickShare()">
+        <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></div>
+        <span class="tab-label">Share</span>
+      </button>
+    </nav>
+  </div>
+</div>
+
+<div id="error-display" style="position:fixed;bottom:0;left:0;right:0;background:var(--danger);color:white;padding:10px 16px;font-size:12px;z-index:9999;display:none;font-family:monospace"></div>
+
+<script>
+try {
+
+/* ─── CONFIG ─── */
+var CFG_KEY = 'dx_config';
+var DEFAULT_PIN = '1984';
+
+function getCfg() {
+  try { return JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveCfg(c) {
+  try { localStorage.setItem(CFG_KEY, JSON.stringify(c)); } catch(e) {}
+}
+function getURL(key) {
+  var c = getCfg();
+  return c['url_' + key] || '';
+}
+function getPin() {
+  return getCfg().pin || DEFAULT_PIN;
+}
+
+/* ─── CONFIG OVERLAY ─── */
+function showConfig() {
+  var c = getCfg();
+  document.getElementById('cfg-master').value = c.masterUrl || '';
+  document.getElementById('cfg-pin').value = c.pin || '';
+  document.getElementById('config-overlay').classList.add('active');
+}
+function closeConfig() {
+  document.getElementById('config-overlay').classList.remove('active');
+}
+function saveConfig() {
+  var newPin = document.getElementById('cfg-pin').value.trim();
+  var masterUrl = document.getElementById('cfg-master').value.trim();
+  if (newPin && (newPin.length !== 4 || !/^\d{4}$/.test(newPin))) {
+    document.getElementById('cfg-msg').style.color = 'var(--danger)';
+    document.getElementById('cfg-msg').textContent = 'PIN must be exactly 4 digits.';
+    return;
+  }
+  var c = getCfg();
+  if (masterUrl) c.masterUrl = masterUrl;
+  if (newPin) c.pin = newPin;
+  saveCfg(c);
+  document.getElementById('cfg-msg').style.color = 'var(--safe)';
+  document.getElementById('cfg-msg').textContent = 'Saved.';
+  setTimeout(closeConfig, 1200);
+}
+
+/* ─── PIN ─── */
+var pinBuf = '';
+function openPinEntry() {
+  pinBuf = '';
+  updateDots();
+  document.getElementById('pin-err').classList.remove('show');
+  document.getElementById('pin-overlay').classList.add('active');
+}
+function closePinEntry() {
+  document.getElementById('pin-overlay').classList.remove('active');
+  pinBuf = '';
+}
+function pp(d) {
+  if (pinBuf.length >= 4) return;
+  pinBuf += d;
+  updateDots();
+  if (pinBuf.length === 4) setTimeout(checkPin, 100);
+}
+function pd() {
+  pinBuf = pinBuf.slice(0, -1);
+  updateDots();
+}
+function updateDots() {
+  for (var i = 0; i < 4; i++) {
+    var el = document.getElementById('pd' + i);
+    if (el) { i < pinBuf.length ? el.classList.add('filled') : el.classList.remove('filled'); }
+  }
+}
+function checkPin() {
+  if (pinBuf === getPin()) {
+    sessionStorage.setItem('dx_auth', '1');
+    closePinEntry();
+    showScreen('trainer');
+    initTrainer();
+  } else {
+    document.getElementById('pin-err').classList.add('show');
+    pinBuf = '';
+    updateDots();
+    setTimeout(function() { document.getElementById('pin-err').classList.remove('show'); }, 2000);
+  }
+}
+
+/* ─── SCREENS ─── */
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var t = document.getElementById('screen-' + name);
+  if (t) t.classList.add('active');
+}
+function exitTrainer() {
+  sessionStorage.removeItem('dx_auth');
+  showScreen('pin');
+}
+
+/* ─── TABS ─── */
+function tTab(idx, btn) {
+  document.querySelectorAll('#trainer-content .tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('#trainer-nav .tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  var p = document.getElementById('tp' + idx);
+  if (p) p.classList.add('active');
+  if (btn) btn.classList.add('active');
+  var c = document.getElementById('trainer-content');
+  if (c) c.scrollTop = 0;
+}
+
+/* ─── INIT ─── */
+function initTrainer() {
+  renderProgs();
+  initConsult();
+  renderQuickShare();
+}
+
+/* ─── TOAST ─── */
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2000);
+}
+
+/* ─── API CALL — single master webhook ─── */
+var MASTER_URL = 'https://dxk9academy.app.n8n.cloud/webhook/dxk9-master';
+
+function apiCall(action, body, callback) {
+  var c = getCfg();
+  var url = c.masterUrl || MASTER_URL;
+  body.action = action;
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) { callback(null, data); })
+  .catch(function(e) { callback({ error: true, message: e.message }); });
+}
+
+/* ════════════════════════════════════
+   PROGRAMME LIBRARY
+════════════════════════════════════ */
+var PROGS = [
+  {code:'CAT1-BST-01',name:'Basic Skills Training',cat:'Foundational',purpose:'Establish the foundational communication framework between owner and dog. Introduces marker system, builds attention, installs sit, down, and stand on cue.',intake:'Any dog 12 weeks+. No prior training required. First programme in all non-puppy foundation cases.',exit:'Dog responds to YES/NOPE markers. Reliable sit, down, stand in low-distraction environment. Owner can use markers correctly.',keywords:'basic skills attention sit down stand markers'},
+  {code:'CAT1-BOT-02',name:'Basic Obedience Training',cat:'Foundational',purpose:'Formalise sit, down, stand with duration and distance. Owner learns to apply structure in daily life. Builds consistency across all household members.',intake:'CAT1-BST-01 complete or dog has reliable attention and basic compliance.',exit:'3-minute sit/down stay with owner at 3m distance. Reliable across all household members including helper.',keywords:'obedience sit down stay duration distance'},
+  {code:'CAT1-LLW-03',name:'Leash Mechanics & Loose Leash Walking',cat:'Foundational',purpose:'Eliminate pulling, lunging, and leash tension. Install proper heel position and LET\'S GO directional cue. Built for Dubai environments — lobbies, lifts, car parks, streets.',intake:'Any dog with leash issues: pulling, forging, lagging, weaving.',exit:'Dog maintains loose leash in low-distraction environment. Responds to LET\'S GO. No sustained pulling for 20+ minutes.',keywords:'leash pulling loose leash walking lobby lift heel direction'},
+  {code:'CAT1-RRR-04',name:'Recall & Response Reliability',cat:'Foundational',purpose:'Build reliable recall from any distance and distraction level. Conditions name response and come cue. Foundation for off-leash work.',intake:'Dog has basic compliance. Owner ready to practise recall daily in varied environments.',exit:'85% recall reliability in moderate distraction. Dog turns and moves toward owner on first cue.',keywords:'recall come name response reliability distance'},
+  {code:'CAT1-PBT-05',name:'Place & Boundary Training',cat:'Foundational',purpose:'Install PLACE cue on raised cot. Build duration and distraction tolerance. Teach door and threshold boundaries. High-value tool for Dubai apartment and villa life.',intake:'Dog has basic compliance. Used for: excited greeting, door dashing, counter surfing, inability to settle.',exit:'Dog holds PLACE 15+ minutes with moderate household distraction. Holds threshold boundary at front door.',keywords:'place boundary cot door threshold greeting settle doorbell'},
+  {code:'CAT1-CTC-06',name:'Crate Training & Confinement Acceptance',cat:'Foundational',purpose:'Build positive crate association and voluntary entry. Install duration tolerance. Manage separation distress at low to moderate levels through confinement structure.',intake:'Dog refuses crate, shows anxiety in crate, or no confinement system established. Mild-moderate separation anxiety (refer SAP if severe).',exit:'Dog enters crate voluntarily. Settles within 5 minutes. Tolerates 3+ hours without sustained distress.',keywords:'crate confinement den settle anxiety refusal'},
+  {code:'CAT1-OLR-07',name:'Off-Leash Reliability Training',cat:'Foundational',purpose:'Build reliable off-leash control in real-world environments. Introduces HERE emergency recall. Prerequisites: all CAT1 complete, 85% compliance on-leash.',intake:'Dog has completed full CAT1 sequence. Owner committed to long-line work progression.',exit:'85% reliability on all primary cues off-leash. HERE response from 30m in moderate distraction.',keywords:'off leash reliability here emergency recall long line'},
+  {code:'CAT2-PFP-08',name:'Puppy Foundation Package',cat:'Developmental',purpose:'8-session, 4-week fixed structure for dogs 8–20 weeks. Covers socialisation, marker introduction, basic compliance, bite inhibition, crate, and household rules. The ONLY package for puppies — no exceptions.',intake:'Puppy 8–20 weeks only. Fixed structure — not adjusted per behaviour issues at this age.',exit:'Puppy responds to YES/NOPE. Sits on cue. Enters crate. Shows appropriate bite inhibition. Owner understands socialisation protocol.',keywords:'puppy foundation 8 weeks young bite inhibition socialisation'},
+  {code:'CAT3-SCB-09',name:'Socialisation & Confidence Building',cat:'Socialisation',purpose:'Build confidence in fearful, anxious, or under-socialised dogs through systematic exposure and positive pairing.',intake:'Dog shows fear, anxiety, or avoidance of people, environments, or novel stimuli. No overt aggression.',exit:'Dog engages with previously avoided stimuli at threshold. Reduced freeze, flee, and appeasement signals in novel environments.',keywords:'socialisation confidence fearful anxious exposure novel stimuli'},
+  {code:'CAT3-SST-10',name:'Structured Socialisation',cat:'Socialisation',purpose:'Systematic controlled exposure for dogs that need structured interaction with people and dogs. Controlled greetings, parallel walking, managed play.',intake:'Dog is over-aroused, rude, or out of control in social situations. Not primarily fear-based — more over-excitement.',exit:'Dog maintains composure during controlled greeting. Can walk parallel with unfamiliar dog.',keywords:'structured socialisation over-aroused greeting parallel walk'},
+  {code:'CAT3-DDI-11',name:'Dog-to-Dog Introduction & Integration',cat:'Socialisation',purpose:'Structured protocol for introducing two dogs in the same household or managed settings. Parallel walking, threshold management, neutral space introduction, cohabitation rules.',intake:'Client adding a second dog, or two dogs in same household have unstable relationship. Not appropriate for active aggression — refer CAT7 first.',exit:'Dogs can coexist without sustained tension. Owner can manage interactions. Clear feeding and resource protocols in place.',keywords:'introduction integration two dogs second dog cohabitation'},
+  {code:'CAT4-BMT-12',name:'Behavioural Modification',cat:'Behaviour',purpose:'Umbrella programme for learned undesirable behaviours that are not fear, anxiety, or aggression-based. Jumping, counter surfing, door dashing, rough play, mouthing in adolescents.',intake:'Dog has established unwanted behaviours driven by reinforcement history, not fear or anxiety. Owner inconsistency usually a primary factor.',exit:'Target behaviours reduced 80%+ in home environment. Owner applies structure consistently. All household members aligned.',keywords:'jumping mouthing counter surfing door dashing rough play modification behaviour'},
+  {code:'CAT4-DCC-13',name:'Desensitisation & Counterconditioning',cat:'Behaviour',purpose:'Systematic DS/CC protocol for dogs with specific trigger-based responses. Stimulus gradient work, threshold identification, CER building.',intake:'Dog has specific identifiable trigger causing fear, anxiety, or reactivity. Not appropriate for unpredictable or severe aggression.',exit:'Dog demonstrates neutral or positive CER to previously triggering stimulus at working threshold.',keywords:'desensitisation counterconditioning DS CC trigger threshold CER stimulus'},
+  {code:'CAT4-ICE-14',name:'Impulse Control & Emotional Regulation',cat:'Behaviour',purpose:'Build the dog\'s ability to pause, defer, and regulate arousal. WAIT, STAY, duration work, leave it, go around. High-value for adolescent and high-drive dogs.',intake:'Dog has difficulty controlling impulses — lunging at food, unable to settle, over-aroused at trigger events.',exit:'Dog holds WAIT at threshold with handler at 2m. Maintains 3-minute STAY with mild distraction. Can disengage from food lure independently.',keywords:'impulse control emotional regulation arousal WAIT STAY high drive adolescent'},
+  {code:'CAT5-FAI-15',name:'Fear & Anxiety Intervention',cat:'Fear',purpose:'Structured fear reduction protocol for generalised anxiety or specific phobia responses. Combines DS/CC with environmental management and owner coaching.',intake:'Dog presents with fear responses to identifiable stimuli or generalised anxiety. No aggression as primary concern.',exit:'Measurable reduction in fear indicators. Dog can function in previously overwhelming environment with owner support.',keywords:'fear anxiety phobia intervention generalised scared'},
+  {code:'CAT5-SAP-16',name:'Separation Anxiety Protocol',cat:'Fear',purpose:'Systematic absence-building protocol for separation anxiety. Minimum 8-session commitment. Owner must be able to control departures during programme.',intake:'Dog shows sustained distress — vocalisation, destruction, elimination, self-harm — when alone. Severe cases require vet support.',exit:'Dog tolerates 2-hour absence without sustained distress. Owner has departure routine installed. Safe zone established.',keywords:'separation anxiety alone distress vocalisation destruction departure'},
+  {code:'CAT5-NSP-17',name:'Noise Sensitivity & Phobia Protocol',cat:'Fear',purpose:'Desensitisation protocol for noise triggers — thunder, fireworks, traffic, construction, UAE call to prayer proximity.',intake:'Dog shows fear response to noise stimuli: panting, hiding, shaking, vocalisation, destructive behaviour during noise events.',exit:'Reduced fear response to recorded trigger at working volume. Owner has management protocol for live events.',keywords:'noise thunder fireworks sound sensitivity phobia UAE call prayer'},
+  {code:'CAT6-FBR-18',name:'Fear-Based Reactivity Rehabilitation',cat:'Reactivity',purpose:'Rehabilitation for dogs that react from a fear baseline. Trigger: dogs, people, vehicles, sounds. Behaviour driven by fear not frustration.',intake:'Dog shows reactive behaviour that de-escalates when trigger disappears. Posture: low, tail tucked, ears back. No bite history.',exit:'80% reduction in reactive events at working threshold. Dog can pass trigger at 10m with owner management.',keywords:'fear reactivity reactive leash fearful barking lunging'},
+  {code:'CAT6-FRR-19',name:'Frustration-Based Reactivity Rehabilitation',cat:'Reactivity',purpose:'Rehabilitation for dogs reactive from frustration baseline — want to GET to the trigger. Barrier frustration, on-leash frustration. High arousal, forward posture.',intake:'Dog is reactive but posture is forward and high. Friendly but over-aroused. On-leash reactivity that disappears off-leash.',exit:'Dog can pass trigger at 5m without reactive response. Controlled greeting possible.',keywords:'frustration reactivity barrier on-leash lunging forward arousal'},
+  {code:'CAT6-TMT-20',name:'Threshold Management Training',cat:'Reactivity',purpose:'Threshold identification, management, and systematic threshold-pushing protocol. Used standalone or with FBR/FRR.',intake:'Dog has an identified threshold. Used with reactive, anxious, or fear-based dogs where owner needs explicit threshold management skills.',exit:'Owner can accurately identify dog\'s threshold in real time. Dog responds to WAIT and name below threshold.',keywords:'threshold management distance reactive anxious'},
+  {code:'CAT7-AAC-21',name:'Aggression Assessment & Case Evaluation',cat:'Aggression',purpose:'Structured aggression assessment — NOT a training programme. Determines: type, severity, prognosis, appropriate intervention, proceed or refer. REQUIRED before any aggression rehabilitation.',intake:'Any case where aggression is the primary presenting concern. Dog has growled, snapped, or bitten a person or another dog.',exit:'Written assessment report. Proceed/refer/decline decision made. If proceed: programme and package prescribed. Aggression Acknowledgement signed.',keywords:'aggression assessment biting growling snapping resource guarding evaluation'},
+  {code:'CAT7-ARH-22',name:'Aggression Rehabilitation',cat:'Aggression',purpose:'Structured rehabilitation for confirmed aggression following CAT7-AAC-21. Type-specific — dog-to-dog, dog-to-stranger, dog-to-familiar, resource guarding.',intake:'CAT7-AAC-21 complete. Dexter has decided to proceed. Aggression Acknowledgement signed. Vet clearance obtained.',exit:'Measurable reduction in aggression incidents. Management protocol in place. Owner can prevent and interrupt escalation.',keywords:'aggression rehabilitation bite history dog-to-dog resource guarding'},
+  {code:'CAT8-AOS-23',name:'Advanced Obedience & Stimulus Control',cat:'Advanced',purpose:'Advanced formal obedience with precise stimulus control. For owners who want elite-level performance under high distraction, at distance, with duration.',intake:'Dog has completed full CAT1 sequence. 85%+ reliability on all primary cues. Owner wants elite performance.',exit:'All primary cues at competition-adjacent standard. Reliable in high-distraction Dubai environments.',keywords:'advanced obedience stimulus control heel formal distance precision'},
+  {code:'CAT8-BGF-24',name:'Breed-Specific Genetic Fulfilment',cat:'Advanced',purpose:'Customised programme addressing breed-specific drives and genetic needs not met by standard obedience. Herding, working, sporting, terrier, hound breeds.',intake:'Dog\'s breed profile indicates strong genetic drives presenting as problem behaviours. Standard obedience not resolving because the drive is not the problem — the outlet is.',exit:'Dog has structured outlet for primary genetic drive. Problem behaviours reduced. Owner understands breed-specific management.',keywords:'breed specific genetic drive herding working sporting terrier hound fulfilment'}
+];
+
+var activeFilter = 'ALL';
+var searchQuery = '';
+
+function setFilter(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-pill').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  renderProgs();
+}
+
+function filterProgs() {
+  searchQuery = document.getElementById('prog-search').value.toLowerCase();
+  renderProgs();
+}
+
+function renderProgs() {
+  var list = document.getElementById('prog-list');
+  if (!list) return;
+  var filtered = PROGS.filter(function(p) {
+    var matchCat = activeFilter === 'ALL' || p.cat === activeFilter || p.cat.indexOf(activeFilter) >= 0;
+    var matchSearch = !searchQuery || p.name.toLowerCase().indexOf(searchQuery) >= 0 || p.code.toLowerCase().indexOf(searchQuery) >= 0 || (p.keywords && p.keywords.toLowerCase().indexOf(searchQuery) >= 0);
+    return matchCat && matchSearch;
+  });
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="card"><div class="card-body">No programmes match your search.</div></div>';
+    return;
+  }
+  var html = '';
+  filtered.forEach(function(p) {
+    html += '<div class="sop-card" id="sop-' + p.code.replace(/[^a-z0-9]/gi,'') + '">' +
+      '<div class="sop-header" onclick="toggleSOP(this.parentElement)">' +
+        '<div><div class="sop-code">' + p.code + '</div><div class="sop-name">' + p.name + '</div><div class="sop-cat">' + p.cat + '</div></div>' +
+        '<svg class="sop-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</div>' +
+      '<div class="sop-body">' +
+        '<div class="sop-section"><div class="sop-section-title">Purpose</div><div class="sop-section-body">' + p.purpose + '</div></div>' +
+        '<div class="sop-section"><div class="sop-section-title">Intake Criteria</div><div class="sop-section-body">' + p.intake + '</div></div>' +
+        '<div class="sop-section"><div class="sop-section-title">Exit Criteria</div><div class="sop-section-body">' + p.exit + '</div></div>' +
+      '</div>' +
+    '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function toggleSOP(card) {
+  card.classList.toggle('open');
+}
+
+/* ════════════════════════════════════
+   CONSULTATION TOOL
+════════════════════════════════════ */
+var consultData = {};
+var consultStep = 0;
+var TOTAL_STEPS = 6;
+var selectedBehaviours = [];
+var selectedGoals = [];
+
+var BEHAVIOURS = ['Pulling on leash','Jumping on people','Not coming when called','Leash reactivity — dogs','Leash reactivity — people','Excessive barking','Separation anxiety','Fearful / anxious','Aggressive to dogs','Aggressive to people','Resource guarding','Destructive behaviour','Door dashing','Counter surfing','Scared of noises','Rough with children','Poor lobby / lift behaviour','Mouthing / nipping','Cannot stay','Off-leash unreliable','Crate refusal'];
+var GOALS = ['Loose leash walking','Reliable recall','Calm at door / lift','Calm in lobby','Sit / Down / Stay','Off-leash control','Crate trained','Stop jumping','Calm around dogs','Calm around strangers','Can be left alone','Better with children','Puppy foundation','Good with helper','Introduce second dog','Manage aggression'];
+
+function initConsult() {
+  consultStep = 0;
+  consultData = {};
+  selectedBehaviours = [];
+  selectedGoals = [];
+  renderConsultStep();
+}
+
+function renderStepIndicator() {
+  var html = '';
+  for (var i = 0; i < TOTAL_STEPS; i++) {
+    var cls = i < consultStep ? 'done' : (i === consultStep ? 'active' : '');
+    html += '<div class="step-dot ' + cls + '"></div>';
+  }
+  var ind = document.getElementById('step-indicator');
+  if (ind) ind.innerHTML = html;
+}
+
+function renderConsultStep() {
+  renderStepIndicator();
+  var c = document.getElementById('consult-step-content');
+  if (!c) return;
+  if (consultStep === 0) {
+    c.innerHTML = '<div class="eyebrow">Step 1 of 6</div><div class="sec-title" style="font-size:20px">Owner & Dog Details</div>' +
+      '<div class="field-group"><label class="field-label">Owner Name</label><input class="field-input" id="f-owner" placeholder="Full name"></div>' +
+      '<div class="field-group"><label class="field-label">WhatsApp Number</label><input class="field-input" id="f-phone" placeholder="+971 50 000 0000" type="tel"></div>' +
+      '<div class="field-group"><label class="field-label">Dubai Area</label><input class="field-input" id="f-area" placeholder="JLT / Downtown / Arabian Ranches…"></div>' +
+      '<div class="field-group"><label class="field-label">Living Situation</label><select class="field-select" id="f-living"><option value="">Select…</option><option>Apartment</option><option>Villa</option><option>Compound Villa</option><option>Townhouse</option></select></div>' +
+      '<div class="field-group"><label class="field-label">Dog Name</label><input class="field-input" id="f-dog" placeholder="Dog name"></div>' +
+      '<div class="field-group"><label class="field-label">Breed</label><input class="field-input" id="f-breed" placeholder="Breed"></div>' +
+      '<div class="field-group"><label class="field-label">Age</label><select class="field-select" id="f-age"><option value="">Select…</option><option>8–16 weeks</option><option>4–6 months</option><option>6–12 months</option><option>1–2 years</option><option>2–6 years</option><option>7+ years</option></select></div>' +
+      '<div class="field-group"><label class="field-label">Sex</label><select class="field-select" id="f-sex"><option value="">Select…</option><option>Male intact</option><option>Male neutered</option><option>Female intact</option><option>Female spayed</option></select></div>' +
+      '<div class="field-group"><label class="field-label">Prior Training</label><select class="field-select" id="f-prior"><option value="">Select…</option><option>None</option><option>Basic classes</option><option>Another trainer</option><option>Multiple trainers</option></select></div>' +
+      '<button class="btn-primary" style="margin-top:8px" onclick="consultNext0()">Next →</button>';
+  } else if (consultStep === 1) {
+    c.innerHTML = '<div class="eyebrow">Step 2 of 6</div><div class="sec-title" style="font-size:20px">Household</div>' +
+      '<div class="field-group"><label class="field-label">Helper / Maid</label><select class="field-select" id="f-helper"><option value="">Select…</option><option>Yes – handles dog daily</option><option>Sometimes</option><option>No</option></select></div>' +
+      '<div class="field-group"><label class="field-label">Children in Home</label><select class="field-select" id="f-children"><option value="">Select…</option><option>None</option><option>Under 5</option><option>5–12</option><option>Teenager</option><option>Mixed ages</option></select></div>' +
+      '<div class="field-group"><label class="field-label">Other Dogs</label><select class="field-select" id="f-dogs"><option value="">Select…</option><option>None</option><option>1</option><option>2 or more</option></select></div>' +
+      '<div style="display:flex;gap:10px;margin-top:8px"><button class="btn-outline" style="flex:1" onclick="consultStep--;renderConsultStep()">← Back</button><button class="btn-primary" style="flex:2" onclick="consultNext1()">Next →</button></div>';
+  } else if (consultStep === 2) {
+    var chips = BEHAVIOURS.map(function(b) {
+      var sel = selectedBehaviours.some(function(s) { return s.behaviour === b; });
+      return '<button class="chip' + (sel ? ' selected' : '') + '" onclick="toggleBehaviour(\'' + b.replace(/'/g,"\\'") + '\',this)">' + b + '</button>';
+    }).join('');
+    c.innerHTML = '<div class="eyebrow">Step 3 of 6</div><div class="sec-title" style="font-size:20px">Behaviour Issues</div>' +
+      '<div class="sec-sub" style="margin-bottom:14px">Tap to select all that apply. Then set severity for each.</div>' +
+      '<div class="chip-row" id="beh-chips">' + chips + '</div>' +
+      '<div id="beh-severity"></div>' +
+      '<div class="field-group" style="margin-top:14px"><label class="field-label">Other (free text)</label><input class="field-input" id="f-beh-other" placeholder="Any other behaviours…"></div>' +
+      '<div style="display:flex;gap:10px;margin-top:8px"><button class="btn-outline" style="flex:1" onclick="consultStep--;renderConsultStep()">← Back</button><button class="btn-primary" style="flex:2" onclick="consultNext2()">Next →</button></div>';
+    renderSeverityPickers();
+  } else if (consultStep === 3) {
+    var gchips = GOALS.map(function(g) {
+      var sel = selectedGoals.some(function(s) { return s.goal === g; });
+      return '<button class="chip' + (sel ? ' selected' : '') + '" onclick="toggleGoal(\'' + g.replace(/'/g,"\\'") + '\',this)">' + g + '</button>';
+    }).join('');
+    c.innerHTML = '<div class="eyebrow">Step 4 of 6</div><div class="sec-title" style="font-size:20px">Owner Goals</div>' +
+      '<div class="sec-sub" style="margin-bottom:14px">What does success look like?</div>' +
+      '<div class="chip-row">' + gchips + '</div>' +
+      '<div class="field-group" style="margin-top:14px"><label class="field-label">Other (free text)</label><input class="field-input" id="f-goal-other" placeholder="Any other goals…"></div>' +
+      '<div style="display:flex;gap:10px;margin-top:8px"><button class="btn-outline" style="flex:1" onclick="consultStep--;renderConsultStep()">← Back</button><button class="btn-primary" style="flex:2" onclick="consultNext3()">Next →</button></div>';
+  } else if (consultStep === 4) {
+    c.innerHTML = '<div class="eyebrow">Step 5 of 6</div><div class="sec-title" style="font-size:20px">Notes</div>' +
+      '<div class="field-group"><label class="field-label">Consultation Notes</label><textarea class="field-textarea" id="f-notes" rows="6" placeholder="Anything else relevant — vet history, what\'s been tried, lifestyle factors…"></textarea></div>' +
+      '<div style="display:flex;gap:10px;margin-top:8px"><button class="btn-outline" style="flex:1" onclick="consultStep--;renderConsultStep()">← Back</button><button class="btn-primary" style="flex:2" onclick="submitConsult()">Generate Plan →</button></div>';
+  } else if (consultStep === 5) {
+    c.innerHTML = '<div class="eyebrow">Generating…</div><div class="sec-title" style="font-size:20px">Building Recommendation</div><div class="loader" style="padding:50px 0"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div>';
+  } else if (consultStep === 6) {
+    var r = consultData.result || {};
+    var agFlag = r.aggressionFlag ? '<div class="aggression-flag"><div class="aggression-flag-text">⚠ AGGRESSION FLAG — CAT7-AAC-21 Assessment Required Before Any Programme</div></div>' : '';
+    var progs = (r.programmes || []).map(function(p) {
+      return '<div class="prog-card"><div class="prog-code">' + p.code + '</div><div class="prog-name">' + p.name + '</div><div class="prog-rationale">' + p.rationale + '</div></div>';
+    }).join('');
+    c.innerHTML = '<div class="eyebrow">Step 6 of 6</div><div class="sec-title" style="font-size:20px">Recommendation</div>' +
+      agFlag +
+      '<div class="result-box"><div class="result-label">Recommended Package</div><div class="result-value" style="font-size:18px;font-weight:600;color:var(--gold)">' + (r.recommendedPackage || '—') + '</div><div class="result-value" style="font-size:14px;margin-top:4px;color:var(--mid)">' + (r.sessions || '') + ' sessions · ' + (r.priceAED ? r.priceAED.toLocaleString() + ' AED + VAT' : '') + '</div></div>' +
+      '<div class="result-box"><div class="result-label">Session 1 Focus</div><div class="result-value">' + (r.session1Focus || '—') + '</div></div>' +
+      '<div class="result-box"><div class="result-label">Owner Homework</div><div class="result-value">' + (r.ownerHomework || '—') + '</div></div>' +
+      '<div class="result-box"><div class="result-label">Behaviour Assessment</div><div class="result-value">' + (r.behaviourAssessment || '—') + '</div></div>' +
+      (r.flags ? '<div class="result-box" style="border-color:rgba(201,168,76,0.3)"><div class="result-label">Flags & Notes</div><div class="result-value">' + r.flags + '</div></div>' : '') +
+      '<div style="margin-top:8px;font-size:12px;letter-spacing:1px;color:var(--mid);margin-bottom:10px;text-transform:uppercase">Deploy These Programmes</div>' +
+      progs +
+      '<button class="copy-btn" onclick="copyConsultSummary()">Copy Full Summary</button>' +
+      '<button class="btn-primary" style="margin-top:10px" onclick="convertToClient()">Convert to Client Record</button>' +
+      '<button class="btn-outline" style="margin-top:8px" onclick="initConsult()">New Consultation</button>';
+  }
+}
+
+function toggleBehaviour(b, btn) {
+  btn.classList.toggle('selected');
+  var idx = selectedBehaviours.findIndex(function(s) { return s.behaviour === b; });
+  if (idx >= 0) { selectedBehaviours.splice(idx, 1); } else { selectedBehaviours.push({ behaviour: b, severity: 'Moderate', duration: '' }); }
+  renderSeverityPickers();
+}
+
+function renderSeverityPickers() {
+  var el = document.getElementById('beh-severity');
+  if (!el) return;
+  if (selectedBehaviours.length === 0) { el.innerHTML = ''; return; }
+  var html = '<div style="margin-top:14px"><div class="field-label" style="margin-bottom:10px">Set Severity</div>';
+  selectedBehaviours.forEach(function(beh, i) {
+    html += '<div style="margin-bottom:12px"><div style="font-size:13px;color:var(--off-white);margin-bottom:5px">' + beh.behaviour + '</div>' +
+      '<div class="sev-row">' +
+      '<button class="sev-btn' + (beh.severity==='Mild' ? ' sel-mild' : '') + '" onclick="setSev(' + i + ',\'Mild\',this.parentElement)">Mild</button>' +
+      '<button class="sev-btn' + (beh.severity==='Moderate' ? ' sel-moderate' : '') + '" onclick="setSev(' + i + ',\'Moderate\',this.parentElement)">Moderate</button>' +
+      '<button class="sev-btn' + (beh.severity==='Severe' ? ' sel-severe' : '') + '" onclick="setSev(' + i + ',\'Severe\',this.parentElement)">Severe</button>' +
+      '</div></div>';
+  });
+  el.innerHTML = html + '</div>';
+}
+
+function setSev(idx, sev, row) {
+  selectedBehaviours[idx].severity = sev;
+  row.querySelectorAll('.sev-btn').forEach(function(b) { b.className = 'sev-btn'; });
+  var map = { 'Mild': 'sel-mild', 'Moderate': 'sel-moderate', 'Severe': 'sel-severe' };
+  row.querySelectorAll('.sev-btn').forEach(function(b) {
+    if (b.textContent === sev) b.classList.add(map[sev]);
+  });
+}
+
+function toggleGoal(g, btn) {
+  btn.classList.toggle('selected');
+  var idx = selectedGoals.findIndex(function(s) { return s.goal === g; });
+  if (idx >= 0) { selectedGoals.splice(idx, 1); } else { selectedGoals.push({ goal: g, priority: 'High' }); }
+}
+
+function consultNext0() {
+  var owner = document.getElementById('f-owner').value.trim();
+  var dog = document.getElementById('f-dog').value.trim();
+  var breed = document.getElementById('f-breed').value.trim();
+  if (!owner || !dog || !breed) { toast('Owner name, dog name, and breed are required.'); return; }
+  consultData.ownerName = owner;
+  consultData.dogName = dog;
+  consultData.breed = breed;
+  consultData.whatsapp = document.getElementById('f-phone').value.trim();
+  consultData.livingArea = document.getElementById('f-area').value.trim();
+  consultData.livingSituation = document.getElementById('f-living').value;
+  consultData.dogAge = document.getElementById('f-age').value;
+  consultData.dogSex = document.getElementById('f-sex').value;
+  consultData.priorTraining = document.getElementById('f-prior').value;
+  consultStep++;
+  renderConsultStep();
+}
+function consultNext1() {
+  consultData.hasHelper = document.getElementById('f-helper').value;
+  consultData.children = document.getElementById('f-children').value;
+  consultData.otherDogs = document.getElementById('f-dogs').value;
+  consultStep++;
+  renderConsultStep();
+}
+function consultNext2() {
+  var other = document.getElementById('f-beh-other').value.trim();
+  if (other) selectedBehaviours.push({ behaviour: other, severity: 'Moderate', duration: '' });
+  consultData.behaviours = selectedBehaviours;
+  consultStep++;
+  renderConsultStep();
+}
+function consultNext3() {
+  var other = document.getElementById('f-goal-other').value.trim();
+  if (other) selectedGoals.push({ goal: other, priority: 'High' });
+  consultData.goals = selectedGoals;
+  consultStep++;
+  renderConsultStep();
+}
+function submitConsult() {
+  consultData.notes = document.getElementById('f-notes').value.trim();
+  consultStep = 5;
+  renderConsultStep();
+  var url = getURL('consultation');
+  if (!url) {
+    toast('Consultation webhook URL not configured. Add it in Settings.');
+    consultStep = 4;
+    renderConsultStep();
+    return;
+  }
+  apiCall('consultation', consultData, function(err, data) {
+    if (err || !data || !data.result) {
+      toast('Error: ' + (err ? err.message : 'No response from N8N'));
+      consultStep = 4;
+      renderConsultStep();
+      return;
+    }
+    consultData.result = data.result;
+    consultData.caseId = data.caseId;
+    consultStep = 6;
+    renderConsultStep();
+  });
+}
+function copyConsultSummary() {
+  var r = consultData.result || {};
+  var progs = (r.programmes || []).map(function(p) { return p.code + ' — ' + p.name + ': ' + p.rationale; }).join('\n');
+  var text = 'CONSULTATION SUMMARY\n' +
+    'Owner: ' + consultData.ownerName + ' | Dog: ' + consultData.dogName + ' (' + consultData.breed + ', ' + consultData.dogAge + ')\n\n' +
+    'RECOMMENDED PACKAGE\n' + r.recommendedPackage + ' — ' + r.sessions + ' sessions — ' + (r.priceAED || '') + ' AED + VAT\n\n' +
+    (r.aggressionFlag ? '⚠ AGGRESSION FLAG — CAT7-AAC-21 Required\n\n' : '') +
+    'PROGRAMMES\n' + progs + '\n\n' +
+    'SESSION 1 FOCUS\n' + r.session1Focus + '\n\n' +
+    'OWNER HOMEWORK\n' + r.ownerHomework + '\n\n' +
+    'ASSESSMENT\n' + r.behaviourAssessment + '\n\n' +
+    (r.flags ? 'FLAGS\n' + r.flags : '') +
+    '\n\nDX K9 Academy — Structure. Clarity. Real-Life Results.';
+  navigator.clipboard.writeText(text).then(function() { toast('Summary copied to clipboard'); });
+}
+function convertToClient() {
+  var r = consultData.result || {};
+  var progs = (r.programmes || []).map(function(p) { return p.code; }).join(', ');
+  apiCall('createClient', {
+    ownerName: consultData.ownerName,
+    dogName: consultData.dogName,
+    breed: consultData.breed,
+    dogAge: consultData.dogAge,
+    dogSex: consultData.dogSex,
+    whatsapp: consultData.whatsapp,
+    livingArea: consultData.livingArea,
+    livingSituation: consultData.livingSituation,
+    hasHelper: consultData.hasHelper,
+    package: r.recommendedPackage,
+    sessionsTotal: r.sessions,
+    aggressionFlag: r.aggressionFlag,
+    programmes: progs
+  }, function(err, data) {
+    if (err) { toast('Error creating client: ' + err.message); return; }
+    toast(consultData.dogName + ' added to Active Clients');
+  });
+}
+
+/* ════════════════════════════════════
+   CLIENTS
+════════════════════════════════════ */
+function loadClients() {
+  var list = document.getElementById('clients-list');
+  if (list) list.innerHTML = '<div class="loader"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div>';
+  apiCall('getClients', {}, function(err, data) {
+    if (err) { if (list) list.innerHTML = '<div class="card"><div class="card-body">' + err.message + '</div></div>'; return; }
+    var clients = data.data || [];
+    if (!clients.length) { if (list) list.innerHTML = '<div class="card"><div class="card-body" style="font-style:normal;color:var(--mid)">No active clients yet. Run a consultation to add your first client.</div></div>'; return; }
+    var html = '';
+    clients.forEach(function(c) {
+      var f = c.fields || c;
+      var completed = parseInt(f['Sessions Completed'] || 0);
+      var total = parseInt(f['Sessions Total'] || 0);
+      var pct = total ? Math.round((completed / total) * 100) : 0;
+      html += '<div class="client-card" onclick="viewClient(\'' + (c.id || '') + '\')">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+          '<div><div class="client-name">' + (f['Dog Name'] || '') + '</div><div class="client-meta">' + (f['Owner Name'] || '') + ' · ' + (f['Package'] || '') + '</div></div>' +
+          '<span class="status-badge status-' + ((f['Status'] || 'active').toLowerCase()) + '">' + (f['Status'] || 'Active') + '</span>' +
+        '</div>' +
+        '<div style="margin-top:8px;font-size:12px;color:var(--mid);margin-bottom:6px">Session ' + completed + ' of ' + total + ' — ' + pct + '%</div>' +
+        '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '</div>';
+    });
+    if (list) list.innerHTML = html;
+  });
+}
+
+function viewClient(id) {
+  toast('Full client view — Phase 2 build');
+}
+
+function showAddClientForm() {
+  toast('Quick add: run a Consultation first, then convert to client');
+}
+
+/* ════════════════════════════════════
+   SCHEDULE
+════════════════════════════════════ */
+function loadSchedule() {
+  var list = document.getElementById('schedule-list');
+  if (list) list.innerHTML = '<div class="loader"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div>';
+  apiCall('schedule', {}, function(err, data) {
+    if (err) {
+      if (list) list.innerHTML = '<div class="card"><div class="card-body">' + err.message + '</div></div>';
+      return;
+    }
+    var events = data.events || [];
+    if (!events.length) {
+      if (list) list.innerHTML = '<div class="card"><div class="card-body">No sessions scheduled in the next 7 days.</div></div>';
+      return;
+    }
+    var html = '';
+    events.forEach(function(ev) {
+      var dt = ev.start ? new Date(ev.start) : null;
+      var dateStr = dt ? dt.toLocaleDateString('en-AE', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+      var timeStr = dt ? dt.toLocaleTimeString('en-AE', { hour: '2-digit', minute: '2-digit' }) : '';
+      html += '<div class="sched-card">' +
+        '<div class="sched-date">' + dateStr + ' · ' + timeStr + '</div>' +
+        '<div class="sched-title">' + (ev.title || 'Session') + '</div>' +
+        '<div class="sched-meta">' + (ev.location || '') + (ev.description ? ' · ' + ev.description.substring(0,60) : '') + '</div>' +
+      '</div>';
+    });
+    if (list) list.innerHTML = html;
+  });
+}
+
+/* ════════════════════════════════════
+   QUICK SHARE
+════════════════════════════════════ */
+function renderQuickShare() {
+  var el = document.getElementById('quickshare-content');
+  if (!el) return;
+  el.innerHTML =
+    renderDocCard('Pre-Session Guide', 'What to prepare before Session 1. Send to all new clients after booking.', 'presession') +
+    renderDocCard('House Rules & Boundaries', 'The eight rules governing daily life at home. Share immediately after consultation.', 'houserules') +
+    renderDocCard('Policies Reference', 'Rescheduling, payment, refunds, lifetime support.', 'policies') +
+    '<div class="doc-card">' +
+      '<div class="doc-card-title">Session Recap Generator</div>' +
+      '<div class="doc-card-desc">Fill in session details. Claude writes a client-ready recap.</div>' +
+      '<button class="copy-btn" onclick="showRecapForm()">Generate Recap →</button>' +
+    '</div>' +
+    '<div class="doc-card">' +
+      '<div class="doc-card-title">Daily Routine Builder</div>' +
+      '<div class="doc-card-desc">Input dog details and schedule. Claude generates a personalised routine PDF.</div>' +
+      '<button class="copy-btn" onclick="showRoutineForm()">Build Routine →</button>' +
+    '</div>';
+}
+
+function renderDocCard(title, desc, key) {
+  return '<div class="doc-card">' +
+    '<div class="doc-card-title">' + title + '</div>' +
+    '<div class="doc-card-desc">' + desc + '</div>' +
+    '<button class="copy-btn" onclick="copyDoc(\'' + key + '\')">Copy to Clipboard</button>' +
+  '</div>';
+}
+
+var DOCS = {
+  presession: 'PRE-SESSION GUIDE\nDX K9 Academy\n\nWHAT TO DO BEFORE SESSION 1\n\n• Clear 3–4 metres of open floor space in your main living area\n• Place the raised training cot where we will work. If you do not have one, purchase one before Session 1 — it is not optional.\n• Do not feed a full meal within 2 hours of the session\n• Give your dog a short toilet break before I arrive\n• All household members present for Session 1 if possible\n• Domestic helper must be present for at least one session during the programme\n\nWHAT TO EXPECT\nSession 1 is execution — not observation. Training begins immediately. You are the primary handler from minute one.\n\nWHAT NOT TO DO\n• Do not heavily exercise the dog in the hours before the session\n• Do not allow the dog to greet me at the door — ask it to sit or go to place before I arrive\n\nHAVE READY\n• Collar and leash\n• High-value treats (small, soft — chicken, cheese, hot dog)\n• Raised training cot\n• Water for your dog\n\nDX K9 Academy · Structure. Clarity. Real-Life Results.',
+
+  houserules: 'HOUSE RULES & BOUNDARIES GUIDE\nDX K9 Academy\n\nTHE CORE PRINCIPLE\nStructure creates clarity. Clarity creates behaviour.\n\nTHE EIGHT RULES — START NOW\n\n1. Freedom is earned, not given\nLimit unsupervised access. No free-roaming the full home until it is earned through consistent, reliable behaviour.\n\n2. Nothing in life is free\nAsk for a sit before food, before going outside, before play. Every interaction is a micro-training moment.\n\n3. Four on the floor\nNo jumping is rewarded. Ever. By anyone. Including guests.\n\n4. The door belongs to you\nYour dog does not bolt through any door or threshold. WAIT is the rule at every entry point.\n\n5. On the furniture by invitation only\nIf the dog is not allowed on the sofa, that rule is applied by all household members, always — no exceptions.\n\n6. Mealtime structure\nFixed feeding times. Bowl goes down, dog eats, bowl comes up. No grazing.\n\n7. The helper applies the same rules\nYour domestic helper must know and apply every rule in this guide. Inconsistency from any household member undoes the training.\n\n8. Calm gets access, chaos gets nothing\nDo not pet, talk to, or engage with the dog when it is excited or demanding. Wait. Reward calm.\n\nDX K9 Academy · Structure. Clarity. Real-Life Results.',
+
+  policies: 'DX K9 ACADEMY — POLICIES\n\nRESCHEDULING\nMaximum 2 reschedules per package. 24 hours notice required. Sessions rescheduled without notice are forfeited.\n\nPAYMENT\nFull payment is required before Session 1 begins. Packages expire 90 days from Session 1. Split payment (50% at midpoint) available at Dexter\'s discretion only.\n\nCONSULTATION\nConsultation fee (350 AED + VAT) is non-refundable. 48-hour credit window: if a package is booked within 48 hours of consultation, the fee is credited toward the package.\n\nREFUNDS\nNo refund is issued after Session 1 has been completed.\n\nLIFETIME SUPPORT\nGraduated clients receive lifetime support: 2 sessions per year, 15 minutes each, via email only. This is advisory — not a continuation of training.\n\nDX K9 Academy · @dxk9academy · Dubai, UAE'
+};
+
+function copyDoc(key) {
+  var text = DOCS[key] || '';
+  navigator.clipboard.writeText(text).then(function() { toast('Copied to clipboard'); });
+}
+
+/* ── RECAP FORM ── */
+function showRecapForm() {
+  var el = document.getElementById('quickshare-content');
+  el.innerHTML = '<button class="btn-outline" style="width:auto;padding:0 16px;margin-bottom:18px" onclick="renderQuickShare()">← Back</button>' +
+    '<div class="eyebrow">Session Recap Generator</div>' +
+    '<div class="field-group"><label class="field-label">Owner Name</label><input class="field-input" id="rc-owner" placeholder="Owner name"></div>' +
+    '<div class="field-group"><label class="field-label">Dog Name & Breed</label><input class="field-input" id="rc-dog" placeholder="e.g. Raja — German Shepherd, 14 months"></div>' +
+    '<div class="field-group"><label class="field-label">Session Number & Total</label><input class="field-input" id="rc-session" placeholder="e.g. 3 of 10"></div>' +
+    '<div class="field-group"><label class="field-label">Session Date</label><input class="field-input" id="rc-date" type="date"></div>' +
+    '<div class="field-group"><label class="field-label">What Was Covered</label><textarea class="field-textarea" id="rc-covered" rows="4" placeholder="CAT codes worked, exercises done, what was introduced…"></textarea></div>' +
+    '<div class="field-group"><label class="field-label">Progress Noted</label><textarea class="field-textarea" id="rc-progress" rows="3" placeholder="What improved, what held, what was a challenge…"></textarea></div>' +
+    '<div class="field-group"><label class="field-label">Homework Set</label><textarea class="field-textarea" id="rc-homework" rows="3" placeholder="Specific exercises, rules to apply…"></textarea></div>' +
+    '<div class="field-group"><label class="field-label">Minutes per Day</label><input class="field-input" id="rc-mins" placeholder="e.g. 15"></div>' +
+    '<div class="field-group"><label class="field-label">Next Session Focus</label><input class="field-input" id="rc-next" placeholder="What we build toward next session…"></div>' +
+    '<button class="btn-primary" onclick="generateRecap()">Generate Recap →</button>' +
+    '<div id="rc-result" style="margin-top:16px"></div>';
+}
+
+function generateRecap() {
+  var dog = document.getElementById('rc-dog').value.trim();
+  var parts = dog.split('—');
+  var dogName = parts[0].trim();
+  var breedAge = parts[1] ? parts[1].trim() : dog;
+  var sessionParts = (document.getElementById('rc-session').value || '').split('of');
+  document.getElementById('rc-result').innerHTML = '<div class="loader"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div>';
+  apiCall('recap', {
+    ownerName: document.getElementById('rc-owner').value.trim(),
+    dogName: dogName,
+    breed: breedAge,
+    dogAge: '',
+    sessionNumber: (sessionParts[0] || '').trim(),
+    sessionsTotal: (sessionParts[1] || '').trim(),
+    sessionDate: document.getElementById('rc-date').value,
+    whatWasCovered: document.getElementById('rc-covered').value.trim(),
+    progressNotes: document.getElementById('rc-progress').value.trim(),
+    homeworkSet: document.getElementById('rc-homework').value.trim(),
+    homeworkMinutes: document.getElementById('rc-mins').value.trim(),
+    nextSessionFocus: document.getElementById('rc-next').value.trim()
+  }, function(err, data) {
+    var rc = document.getElementById('rc-result');
+    if (err || !data.recap) {
+      rc.innerHTML = '<div class="card"><div class="card-body">' + (err ? err.message : 'No recap returned') + '</div></div>';
+      return;
+    }
+    rc.innerHTML = '<div class="result-box"><div class="result-label">Generated Recap</div><div class="result-value" style="white-space:pre-line;font-size:14px">' + data.recap + '</div></div><button class="copy-btn" onclick="navigator.clipboard.writeText(' + JSON.stringify(data.recap) + ').then(function(){toast(\'Copied\')})">Copy Recap</button>';
+  });
+}
+
+/* ── ROUTINE FORM ── */
+function showRoutineForm() {
+  var el = document.getElementById('quickshare-content');
+  el.innerHTML = '<button class="btn-outline" style="width:auto;padding:0 16px;margin-bottom:18px" onclick="renderQuickShare()">← Back</button>' +
+    '<div class="eyebrow">Daily Routine Builder</div>' +
+    '<div class="sec-sub" style="margin-bottom:16px">Generates a personalised routine based on your potty & routine training methodology. Printable as PDF.</div>' +
+    '<div class="field-group"><label class="field-label">Owner Name</label><input class="field-input" id="rt-owner" placeholder="Owner name"></div>' +
+    '<div class="field-group"><label class="field-label">Dog Name</label><input class="field-input" id="rt-dog" placeholder="Dog name"></div>' +
+    '<div class="field-group"><label class="field-label">Breed</label><input class="field-input" id="rt-breed" placeholder="Breed"></div>' +
+    '<div class="field-group"><label class="field-label">Dog Age</label><select class="field-select" id="rt-age"><option value="">Select…</option><option>8–10 weeks</option><option>10–12 weeks</option><option>3–4 months</option><option>4–5 months</option><option>5–6 months</option><option>6–12 months</option><option>1–2 years</option><option>2+ years</option></select></div>' +
+    '<div class="field-group"><label class="field-label">Owner Wake Time</label><input class="field-input" id="rt-wake" placeholder="e.g. 6:30 AM" type="time"></div>' +
+    '<div class="field-group"><label class="field-label">Owner Sleep Time</label><input class="field-input" id="rt-sleep" placeholder="e.g. 10:30 PM" type="time"></div>' +
+    '<div class="field-group"><label class="field-label">Meals Per Day</label><select class="field-select" id="rt-meals"><option>4 (puppy under 4 months)</option><option>3 (puppy 4–6 months)</option><option>2 (6 months+)</option></select></div>' +
+    '<div class="field-group"><label class="field-label">Living Situation</label><select class="field-select" id="rt-living"><option>Apartment</option><option>Villa</option><option>Compound Villa</option><option>Townhouse</option></select></div>' +
+    '<div class="field-group"><label class="field-label">Helper Covers Midday?</label><select class="field-select" id="rt-helper"><option value="No">No</option><option value="Yes">Yes</option></select></div>' +
+    '<div class="field-group"><label class="field-label">Special Notes (optional)</label><textarea class="field-textarea" id="rt-notes" rows="3" placeholder="Medical conditions, lifestyle factors, anything relevant…"></textarea></div>' +
+    '<button class="btn-primary" onclick="generateRoutine()">Generate Routine →</button>' +
+    '<div id="rt-result" style="margin-top:16px"></div>';
+}
+
+function generateRoutine() {
+  document.getElementById('rt-result').innerHTML = '<div class="loader"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div>';
+  apiCall('routine', {
+    ownerName: document.getElementById('rt-owner').value.trim(),
+    dogName: document.getElementById('rt-dog').value.trim(),
+    breed: document.getElementById('rt-breed').value.trim(),
+    dogAge: document.getElementById('rt-age').value,
+    wakeTime: document.getElementById('rt-wake').value,
+    sleepTime: document.getElementById('rt-sleep').value,
+    mealsPerDay: document.getElementById('rt-meals').value,
+    livingSituation: document.getElementById('rt-living').value,
+    helperMidday: document.getElementById('rt-helper').value,
+    specialNotes: document.getElementById('rt-notes').value.trim()
+  }, function(err, data) {
+    var rt = document.getElementById('rt-result');
+    if (err || !data.routine) {
+      rt.innerHTML = '<div class="card"><div class="card-body">' + (err ? err.message : 'No routine returned') + '</div></div>';
+      return;
+    }
+    var routine = data.routine;
+    var html = '<div style="margin-bottom:16px">' +
+      '<div class="eyebrow">Daily Routine</div>' +
+      '<div class="sec-title" style="font-size:20px">' + (data.dogName || 'Dog') + '\'s Daily Routine</div>' +
+      '<div class="sec-sub">' + (data.ownerName || '') + ' — DX K9 Academy</div>' +
+    '</div>';
+    if (routine.bladderNote) html += '<div class="result-box"><div class="result-label">Bladder Capacity</div><div class="result-value">' + routine.bladderNote + '</div></div>';
+    if (routine.feedingNote) html += '<div class="result-box"><div class="result-label">Feeding</div><div class="result-value">' + routine.feedingNote + '</div></div>';
+    if (routine.waterNote) html += '<div class="result-box"><div class="result-label">Water Management</div><div class="result-value">' + routine.waterNote + '</div></div>';
+    (routine.blocks || []).forEach(function(block) {
+      html += '<div class="routine-block">' +
+        '<div class="routine-block-header"><div class="routine-block-title">' + (block.emoji || '') + ' ' + block.blockName + ' — ' + block.blockTime + '</div></div>';
+      (block.steps || []).forEach(function(step) {
+        html += '<div class="routine-step"><div class="routine-step-time">' + step.time + '</div><div class="routine-step-content"><div class="routine-step-action">' + step.action + '</div><div class="routine-step-detail">' + step.detail + '</div></div></div>';
+      });
+      html += '</div>';
+    });
+    if (routine.specialNotes) html += '<div class="result-box"><div class="result-label">Special Notes</div><div class="result-value">' + routine.specialNotes + '</div></div>';
+    html += '<button class="btn-primary" style="margin-top:12px" onclick="window.print()">Print / Save as PDF</button>';
+    rt.innerHTML = html;
+  });
+}
+
+/* ─── INIT ─── */
+function init() {
+  if (sessionStorage.getItem('dx_auth') === '1') {
+    showScreen('trainer');
+    initTrainer();
+  } else {
+    showScreen('pin');
+  }
+  renderProgs();
+}
+init();
+
+} catch(e) {
+  var ed = document.getElementById('error-display');
+  if (ed) { ed.style.display = 'block'; ed.textContent = 'ERROR: ' + e.message; }
+}
+</script>
+</body>
+</html>
