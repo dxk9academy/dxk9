@@ -755,13 +755,6 @@ function submitConsult() {
   consultData.notes = document.getElementById('f-notes').value.trim();
   consultStep = 5;
   renderConsultStep();
-  var url = getURL('consultation');
-  if (!url) {
-    toast('Consultation webhook URL not configured. Add it in Settings.');
-    consultStep = 4;
-    renderConsultStep();
-    return;
-  }
   apiCall('consultation', consultData, function(err, data) {
     if (err || !data || !data.result) {
       toast('Error: ' + (err ? err.message : 'No response from N8N'));
